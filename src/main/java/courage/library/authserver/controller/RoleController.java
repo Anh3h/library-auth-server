@@ -5,6 +5,7 @@ import courage.library.authserver.exception.BadRequestException;
 import courage.library.authserver.exception.NotFoundException;
 import courage.library.authserver.service.command.RoleCommand;
 import courage.library.authserver.service.query.RoleQuery;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,7 @@ public class RoleController {
     @Autowired
     private RoleCommand roleCommand;
 
+    @ApiOperation(value="Create new role")
     @RequestMapping(
             method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -33,6 +35,7 @@ public class RoleController {
         return new ResponseEntity<>(newRole, HttpStatus.CREATED);
     }
 
+    @ApiOperation(value="Get all/some roles")
     @RequestMapping(
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE
@@ -53,6 +56,7 @@ public class RoleController {
         return new ResponseEntity<>(roles, HttpStatus.OK);
     }
 
+    @ApiOperation(value="Get a role based on role_id")
     @RequestMapping(
             value = "/{roleId}",
             method = RequestMethod.GET,
@@ -66,6 +70,7 @@ public class RoleController {
         return new ResponseEntity<>( role, HttpStatus.OK );
     }
 
+    @ApiOperation(value="Update a role based on role_id")
     @RequestMapping(
             value = "/{roleId}",
             method = RequestMethod.PUT,
@@ -81,6 +86,7 @@ public class RoleController {
         return new ResponseEntity<>( updatedRole, HttpStatus.OK );
     }
 
+    @ApiOperation(value="Delete role on role_id")
     @RequestMapping(
             value = "/{roleId}",
             method = RequestMethod.DELETE

@@ -1,6 +1,5 @@
 package courage.library.authserver.configuration;
 
-import com.google.common.base.Predicates;
 import courage.library.authserver.service.query.CustomUserDetailService;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,27 +14,22 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.Contact;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import javax.sql.DataSource;
 
 @Configuration
-@EnableWebSecurity( debug = true )
+@EnableWebSecurity(debug = true)
 @Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
-@EnableSwagger2
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -48,7 +42,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 
     @Bean
-    public UserDetailsService userDetailsService(){
+    public UserDetailsService userDetailsService() {
         return new CustomUserDetailService();
     }
 
@@ -67,21 +61,26 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    protected void configure( AuthenticationManagerBuilder auth ) {
+    protected void configure(AuthenticationManagerBuilder auth) {
         auth
                 .authenticationProvider(authenticationProvider());
     }
 
     @Override
-    protected void configure( HttpSecurity http ) throws Exception {
-       http
-               .formLogin().disable()
-               .anonymous().disable()
-               .httpBasic().and()
-               .authorizeRequests().anyRequest().authenticated()
-               .and()
-               .sessionManagement()
-               .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+                .formLogin().disable()
+                .anonymous().disable()
+                .httpBasic().and()
+                .authorizeRequests().anyRequest().authenticated()
+                .and()
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    }
+
+    @Override
+    public void configure(WebSecurity webSecurity) {
+        webSecurity.ignoring().antMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources", "/configuration/security", "/swagger-ui.html", "/webjars/**");
     }
 
     @Bean
@@ -94,7 +93,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         dataSource.setUsername(env.getProperty("spring.datasource.username"));
         dataSource.setPassword(env.getProperty("spring.datasource.password"));
 
-        return  dataSource;
+        return dataSource;
     }
 
     @Bean
@@ -103,32 +102,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public Docket api() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .select()
-                .apis( Predicates.not( RequestHandlerSelectors.basePackage( "org.springframework.cloud.context.environment" ) ))
-                .paths(PathSelectors.any())
-                .build()
-                .apiInfo(apiInfo());
-    }
-
-    @Bean
-    public Flyway flyway(){
+    public Flyway flyway() {
         Flyway flyway = new Flyway();
         flyway.setDataSource(dataSource());
         flyway.migrate();
         return flyway;
-    }
-
-    private ApiInfo apiInfo() {
-        return new ApiInfo(
-                "Authentication Server",
-                "",
-                "API V1.0.0",
-                "Terms of serivce",
-                new Contact("Courage Angeh", "", ""),
-                "License of API",
-                "API LICENCE URL");
     }
 
 }

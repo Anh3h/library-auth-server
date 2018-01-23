@@ -5,6 +5,7 @@ import courage.library.authserver.exception.BadRequestException;
 import courage.library.authserver.exception.NotFoundException;
 import courage.library.authserver.service.command.UserCommand;
 import courage.library.authserver.service.query.UserQuery;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,7 @@ public class UserController {
     @Autowired
     private UserCommand userCommand;
 
+    @ApiOperation(value="Create new user")
     @RequestMapping(
             method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -32,6 +34,7 @@ public class UserController {
         return new ResponseEntity<>(newUser, HttpStatus.CREATED);
     }
 
+    @ApiOperation(value="Get all/some users")
     @RequestMapping(
         method = RequestMethod.GET,
         produces = MediaType.APPLICATION_JSON_VALUE
@@ -52,6 +55,7 @@ public class UserController {
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
+    @ApiOperation(value="Get user based on user_id")
     @RequestMapping(
             value = "/{userId}",
             method = RequestMethod.GET,
@@ -65,6 +69,7 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
+    @ApiOperation(value="Update user based on user_id")
     @RequestMapping(
             value = "/{userId}",
             method = RequestMethod.PUT,
@@ -80,6 +85,7 @@ public class UserController {
         return new ResponseEntity<>(updateUser, HttpStatus.OK);
     }
 
+    @ApiOperation(value="Delete user based on user_id")
     @RequestMapping(
             value = "/{userId}",
             method = RequestMethod.DELETE

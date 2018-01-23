@@ -5,6 +5,7 @@ import courage.library.authserver.exception.BadRequestException;
 import courage.library.authserver.exception.NotFoundException;
 import courage.library.authserver.service.command.LibraryCommand;
 import courage.library.authserver.service.query.LibraryQuery;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,7 @@ public class LibraryController {
     @Autowired
     private LibraryCommand libraryCommand;
 
+    @ApiOperation(value="Create new library")
     @RequestMapping(
             method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -32,6 +34,7 @@ public class LibraryController {
         return new ResponseEntity<>(newLibrary, HttpStatus.CREATED);
     }
 
+    @ApiOperation(value="Get all/some libraries")
     @RequestMapping(
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE
@@ -52,6 +55,7 @@ public class LibraryController {
         return new ResponseEntity<>(libraries, HttpStatus.OK);
     }
 
+    @ApiOperation(value="Get a library based on id")
     @RequestMapping(
             value = "/{libraryId}",
             method = RequestMethod.GET,
@@ -65,6 +69,7 @@ public class LibraryController {
         return new ResponseEntity<>(library, HttpStatus.OK);
     }
 
+    @ApiOperation(value="Update a library based on id")
     @RequestMapping(
             value = "/{libraryId}",
             method = RequestMethod.PUT,
@@ -80,6 +85,7 @@ public class LibraryController {
         return new ResponseEntity<>(updateLibrary, HttpStatus.OK);
     }
 
+    @ApiOperation(value="Delete a library based on library_id")
     @RequestMapping(
             value = "/{libraryId}",
             method = RequestMethod.DELETE
