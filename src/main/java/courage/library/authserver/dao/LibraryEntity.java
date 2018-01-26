@@ -32,13 +32,13 @@ public class LibraryEntity {
     private List<UserEntity> users;
 
     private String logo;
-    private Boolean isAvailable;
+    private Boolean enabled;
 
-    public LibraryEntity(String uuid, String name, String address, String logo, Boolean isAvailable) {
+    public LibraryEntity(String uuid, String name, String address, String logo, Boolean enabled) {
         this.uuid = uuid;
         this.name = name;
         this.address = address;
         this.logo = logo;
-        this.isAvailable = isAvailable;
+        this.enabled = enabled;
     }
 }

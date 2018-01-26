@@ -46,7 +46,7 @@ public class LibraryCommandImplementation implements LibraryCommand {
     @Override
     public void deleteLibrary(String uuid) {
 
-        if ( libraryRepository.findByUuidAndIsAvailable(uuid, true).getUsers().isEmpty() ) {
+        if ( libraryRepository.findByUuidAndEnabled(uuid, true).getUsers().isEmpty() ) {
             libraryJdbcTemplate.deleteEntity(uuid);
         }
         throw BadRequestException.create("Bad Request: Library has one/more librarians");

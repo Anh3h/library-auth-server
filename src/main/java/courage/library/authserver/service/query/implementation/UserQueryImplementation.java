@@ -20,13 +20,19 @@ public class UserQueryImplementation implements UserQuery {
 
     @Override
     public User findUserById(String uuid) {
-        UserEntity userEntity = userRepository.findByUuidAndIsAvailable(uuid, true);
+        UserEntity userEntity = userRepository.findByUuidAndAccountLocked(uuid, false);
         return UserMapper.getUserDTO(userEntity);
     }
 
     @Override
+    public UserEntity findUserByEmail(String email) {
+        UserEntity userEntity = userRepository.findByEmailAndAccountLocked(email, false);
+        return userEntity;
+    }
+
+    @Override
     public Page<User> findUsers(Integer pageNumber, Integer pageSize) {
-        Page<UserEntity> userEntities = userRepository.findByIsAvailable(new PageRequest(pageNumber-1, pageSize), true);
+        Page<UserEntity> userEntities = userRepository.findByAccountLocked(new PageRequest(pageNumber-1, pageSize), false);
         return userEntities.map( userEntity -> UserMapper.getUserDTO(userEntity));
     }
 

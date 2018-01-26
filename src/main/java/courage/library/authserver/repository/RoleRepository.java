@@ -10,10 +10,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RoleRepository extends JpaRepository<RoleEntity, Integer> {
 
-    RoleEntity findByIdAndIsAvailable(@Param("id") String id, @Param("isAvailable") Boolean isAvailable);
+    RoleEntity findByIdAndEnabled(@Param("id") String id, @Param("isAvailable") Boolean isAvailable);
 
     RoleEntity findByName(@Param("name")String name);
 
-    Page<RoleEntity> findByIsAvailable(Pageable pageable, @Param("isAvailable") Boolean isAvailable);
+    Page<RoleEntity> findByEnabled(Pageable pageable, @Param("isAvailable") Boolean isAvailable);
 
 }

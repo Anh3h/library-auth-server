@@ -24,4 +24,9 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>( new ServiceError(409, ex.getMessage()), new HttpHeaders(), HttpStatus.CONFLICT);
     }
 
+    @org.springframework.web.bind.annotation.ExceptionHandler( value = ForbiddenException.class )
+    protected ResponseEntity<Object> handleForbidden(RuntimeException ex ) {
+        return new ResponseEntity<>( new ServiceError(403, ex.getMessage()), new HttpHeaders(), HttpStatus.CONFLICT);
+    }
+
 }

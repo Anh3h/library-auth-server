@@ -42,7 +42,7 @@ public class RoleCommandImplementation implements RoleCommand {
 
     @Override
     public void deleteRole(String id) {
-        if ( roleRepository.findByIdAndIsAvailable(id, true).getUsers() == null ) {
+        if ( roleRepository.findByIdAndEnabled(id, true).getUsers() == null ) {
             roleJdbcTemplate.deleteEntity(id);
         }
         throw BadRequestException.create("Bad Request: Role is used by one/more user ");

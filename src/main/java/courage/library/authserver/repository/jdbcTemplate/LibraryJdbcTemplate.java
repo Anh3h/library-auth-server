@@ -19,7 +19,7 @@ public class LibraryJdbcTemplate implements CustomRepository<LibraryEntity> {
     @Override
     public Library updateEntity(LibraryEntity libraryEntity) {
         String sql = "UPDATE library SET name = ?, address = ?, logo = ? WHERE  " +
-                "is_available = true AND uuid = ? ";
+                "enabled = true AND uuid = ? ";
 
         Object[] parameters = { libraryEntity.getName(), libraryEntity.getAddress(), libraryEntity.getLogo(),
         libraryEntity.getUuid()};
@@ -29,7 +29,7 @@ public class LibraryJdbcTemplate implements CustomRepository<LibraryEntity> {
 
     @Override
     public void deleteEntity(String uuid) {
-        String sql = "UPDATE library SET is_available = false WHERE uuid = ? ";
+        String sql = "UPDATE library SET enabled = false WHERE uuid = ? ";
         this.sqlUpdate(null, sql, new Object[] {uuid});
 
     }

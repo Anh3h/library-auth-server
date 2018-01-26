@@ -20,13 +20,13 @@ public class LibraryQueryImplementation implements LibraryQuery {
 
     @Override
     public Library findLibraryById(String uuid) {
-        LibraryEntity libraryEntity = libraryRepository.findByUuidAndIsAvailable(uuid, true);
+        LibraryEntity libraryEntity = libraryRepository.findByUuidAndEnabled(uuid, true);
         return LibraryMapper.getLibraryDTO(libraryEntity);
     }
 
     @Override
     public Page<Library> findLibraries(Integer pageNumber, Integer pageSize) {
-        Page<LibraryEntity> libraryEntities = libraryRepository.findByIsAvailable(new PageRequest(pageNumber-1, pageSize), true);
+        Page<LibraryEntity> libraryEntities = libraryRepository.findByEnabled(new PageRequest(pageNumber-1, pageSize), true);
         return libraryEntities.map(libraryEntity -> LibraryMapper.getLibraryDTO(libraryEntity));
     }
 

@@ -12,10 +12,10 @@ public interface UserRepository extends JpaRepository<UserEntity, Integer> {
 
     UserEntity findByEmail(@Param("email") String email);
 
-    UserEntity findByUuidAndIsAvailable(@Param("uuid") String uuid, @Param("isAvailable") Boolean isAvailable);
+    UserEntity findByUuidAndAccountLocked(@Param("uuid") String uuid, @Param("isAvailable") Boolean accountLocked);
 
-    UserEntity findByEmailAndIsAvailable(@Param("email") String email, @Param("isAvailable") Boolean isAvailable);
+    UserEntity findByEmailAndAccountLocked(@Param("email") String email, @Param("isAvailable") Boolean accountLocked);
 
-    Page<UserEntity> findByIsAvailable(Pageable pageable, @Param("isAvailable") Boolean isAvailable);
+    Page<UserEntity> findByAccountLocked(Pageable pageable, @Param("isAvailable") Boolean accountLocked);
 
 }

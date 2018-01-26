@@ -13,7 +13,7 @@ public class RoleJdbcTemplate {
     private JdbcTemplate jdbcTemplate;
 
     public void deleteEntity(String id) {
-        String sql = "UPDATE role SET is_available = false WHERE id = ? ";
+        String sql = "UPDATE role SET enabled = false WHERE id = ? ";
 
         try {
             this.jdbcTemplate.update(sql, new Object[] {id});

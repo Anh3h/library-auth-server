@@ -1,13 +1,22 @@
 package courage.library.authserver.service.command;
 
+import courage.library.authserver.dao.UserEntity;
+import courage.library.authserver.dto.Password;
 import courage.library.authserver.dto.User;
 import org.springframework.security.access.prepost.PreAuthorize;
 
-@PreAuthorize("hasRole('ROLE_USER')")
+import java.text.ParseException;
+
 public interface UserCommand {
 
-    User createUser( User user );
-    User updateUser( User user );
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+    User createUser( User user ) throws ParseException;
+
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+    User updateUser( User user ) throws ParseException;
+
+    void updatePassword(String uuid, Password password);
+    UserEntity registerUser(User user ) throws ParseException;
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void deleteUser( String uuid );

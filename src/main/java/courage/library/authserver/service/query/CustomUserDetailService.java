@@ -1,6 +1,9 @@
 package courage.library.authserver.service.query;
 
+import courage.library.authserver.dao.UserEntity;
 import courage.library.authserver.dto.User;
+import courage.library.authserver.exception.BadRequestException;
+import courage.library.authserver.exception.ForbiddenException;
 import courage.library.authserver.repository.UserRepository;
 import courage.library.authserver.service.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +22,22 @@ public class CustomUserDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = UserMapper.getUserDTO( this.userRepository.findByEmailAndIsAvailable(email, true) );
-        if (user == null) {
-            throw new UsernameNotFoundException(String.format("Email[%s] not found", email));
+        try {
+            UserEntity userEntity = this.userRepository.findByEmailAndAccountLocked(email, false);
+
+            if (userEntity == null) {
+                throw new UsernameNotFoundException(String.format("Email[%s] not found", email));
+            }else if (userEntity.getEnabled() == false) {
+                throw ForbiddenException.create("Forbidden: User has to confirm before using this account");
+            }
+
+            User user = UserMapper.getUserDTO(userEntity);
+            return  new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(),
+                    userEntity.getEnabled(), true, true, true, user.getRoles());
+        } catch (RuntimeException ex) {
+            throw BadRequestException.create(ex.getMessage());
         }
 
-        return  new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(),
-                true, true, true, true, user.getRoles());
     }
 
 }

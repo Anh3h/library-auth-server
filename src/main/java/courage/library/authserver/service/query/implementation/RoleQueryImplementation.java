@@ -20,13 +20,13 @@ public class RoleQueryImplementation implements RoleQuery {
 
     @Override
     public Role findRoleById(String id) {
-        RoleEntity roleEntity = roleRepository.findByIdAndIsAvailable(id, true);
+        RoleEntity roleEntity = roleRepository.findByIdAndEnabled(id, true);
         return RoleMappper.getRoleDTO(roleEntity);
     }
 
     @Override
     public Page<Role> findRoles(Integer pageNumber, Integer pageSize) {
-        Page<RoleEntity> entities = roleRepository.findByIsAvailable(new PageRequest(pageNumber-1, pageSize), true);
+        Page<RoleEntity> entities = roleRepository.findByEnabled(new PageRequest(pageNumber-1, pageSize), true);
         return entities.map(roleEntity -> RoleMappper.getRoleDTO(roleEntity));
     }
 

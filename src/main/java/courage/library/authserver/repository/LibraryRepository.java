@@ -10,10 +10,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface LibraryRepository extends JpaRepository<LibraryEntity, Integer> {
 
-    LibraryEntity findByUuidAndIsAvailable(@Param("uuid")String uuid, @Param("isAvailable") Boolean isAvailable);
+    LibraryEntity findByUuidAndEnabled(@Param("uuid")String uuid, @Param("isAvailable") Boolean isAvailable);
 
     LibraryEntity findByName(@Param("name")String name);
 
-    Page<LibraryEntity> findByIsAvailable(Pageable pageable, @Param("isAvailable") Boolean isAvailable);
+    Page<LibraryEntity> findByEnabled(Pageable pageable, @Param("isAvailable") Boolean isAvailable);
 
 }

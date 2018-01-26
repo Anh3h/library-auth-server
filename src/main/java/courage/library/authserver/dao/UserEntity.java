@@ -43,7 +43,8 @@ public class UserEntity {
     @JoinColumn(name="library_id")
     private LibraryEntity library;
 
-    private Boolean isAvailable;
+    private Boolean enabled;
+    private Boolean accountLocked;
 
     @NonNull
     @ManyToMany()
@@ -53,7 +54,7 @@ public class UserEntity {
 
     public UserEntity(String uuid, String firstName, String lastName, String email, String password,
                       Date dob, String telephone, String address, LibraryEntity library,
-                      Boolean isAvailable, List<RoleEntity> roles) {
+                      Boolean enabled, Boolean accountLocked, List<RoleEntity> roles) {
         this.uuid = uuid;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -63,7 +64,8 @@ public class UserEntity {
         this.telephone = telephone;
         this.address = address;
         this.library = library;
-        this.isAvailable = isAvailable;
+        this.enabled = enabled;
         this.roles = roles;
+        this.accountLocked = accountLocked;
     }
 }

@@ -3,8 +3,11 @@ security:
     client:
       client-id: admin
       client-secret: password
+      refresh-token-validity-seconds: 10000
+      access-token-validity-seconds: 3600
     resource:
       id: oauth2_id
+
 
 spring:
   datasource:
@@ -14,7 +17,18 @@ spring:
     driver-class-name: com.mysql.jdbc.Driver
   jpa:
     show-sql: true
-
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    protocol: smtp
+    username: <email>
+    password: <password>
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 logging:
   level:

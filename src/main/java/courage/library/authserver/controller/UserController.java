@@ -1,21 +1,32 @@
 package courage.library.authserver.controller;
 
+import courage.library.authserver.dto.Password;
 import courage.library.authserver.dto.User;
+import courage.library.authserver.dto.UserAccount;
+import courage.library.authserver.eventandlistner.OnRegistrationCompleteEvent;
 import courage.library.authserver.exception.BadRequestException;
 import courage.library.authserver.exception.NotFoundException;
 import courage.library.authserver.service.command.UserCommand;
 import courage.library.authserver.service.query.UserQuery;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/users")
 public class UserController {
+
+    @Autowired
+    ApplicationEventPublisher eventPublisher;
 
     @Autowired
     private UserQuery userQuery;
@@ -29,7 +40,11 @@ public class UserController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<User> createUser( @RequestBody User user ) {
+    public ResponseEntity<User> createUser( @RequestBody UserAccount userAccount ) throws ParseException {
+        System.out.println("creating new user");
+        User user = new User(null, userAccount.getFirstName(), userAccount.getLastName(), userAccount.getEmail(),
+                userAccount.getPassword(), userAccount.getDob(), userAccount.getTelephone(), userAccount.getAddress(),
+                userAccount.getLibrary(), userAccount.getRoles());
         User newUser = this.userCommand.createUser(user);
         return new ResponseEntity<>(newUser, HttpStatus.CREATED);
     }
@@ -66,6 +81,7 @@ public class UserController {
         if (user == null) {
             throw NotFoundException.create("User with id, {0} does not exist", userId);
         }
+
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
@@ -77,12 +93,29 @@ public class UserController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<User> updateUser( @RequestBody User user,
-                                            @PathVariable("userId")String userId) {
+                                            @PathVariable("userId")String userId) throws ParseException {
         if ( this.userQuery.findUserById(userId) == null ) {
             throw NotFoundException.create("User with id, {0} does not exist", userId);
         }
         User updateUser = userCommand.updateUser(user);
         return new ResponseEntity<>(updateUser, HttpStatus.OK);
+    }
+
+    @RequestMapping(
+            value = "/{userId}/updatePassword",
+            method = RequestMethod.PUT,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Map<String, String>> updatePassword( @RequestBody Password password,
+                                            @PathVariable("userId")String userId) throws ParseException {
+        if ( this.userQuery.findUserById(userId) == null ) {
+            throw NotFoundException.create("User with id, {0} does not exist", userId);
+        }
+        userCommand.updatePassword(userId, password);
+        Map<String, String> response = new HashMap<>();
+        response.put("response", "Successfully updated password");
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ApiOperation(value="Delete user based on user_id")
@@ -94,4 +127,6 @@ public class UserController {
         userCommand.deleteUser(userId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
 }
+

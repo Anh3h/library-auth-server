@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -21,8 +20,11 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 @EnableAuthorizationServer
 public class AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdapter {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    @Value("${security.oauth2.client.access-token-validity-seconds}")
+    private int accessTokenValiditySeconds;
+
+    @Value("${security.oauth2.client.refresh-token-validity-seconds}")
+    private int refreshTokenValiditySeconds;
 
     @Value("${security.oauth2.client.client-id}")
     private String clientId;
@@ -32,6 +34,9 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 
     @Value("${security.oauth2.resource.id}")
     private String resourceId;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) {
@@ -63,8 +68,8 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
                 .authorities("ROLE_TRUSTED_CLIENT")
                 .scopes("read", "write")
                 .resourceIds(resourceId)
-                .accessTokenValiditySeconds(120)
-                .refreshTokenValiditySeconds(600);
+                .accessTokenValiditySeconds(accessTokenValiditySeconds)
+                .refreshTokenValiditySeconds(refreshTokenValiditySeconds);
     }
 
     @Bean
