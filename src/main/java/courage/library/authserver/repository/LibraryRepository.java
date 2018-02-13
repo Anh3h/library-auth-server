@@ -14,6 +14,8 @@ public interface LibraryRepository extends JpaRepository<LibraryEntity, Integer>
 
     LibraryEntity findByName(@Param("name")String name);
 
+    LibraryEntity findByUuid(@Param("uuid")String uuid);
+
     Page<LibraryEntity> findByEnabled(Pageable pageable, @Param("isAvailable") Boolean isAvailable);
 
 }

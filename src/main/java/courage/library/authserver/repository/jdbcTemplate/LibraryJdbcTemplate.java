@@ -31,7 +31,12 @@ public class LibraryJdbcTemplate implements CustomRepository<LibraryEntity> {
     public void deleteEntity(String uuid) {
         String sql = "UPDATE library SET enabled = false WHERE uuid = ? ";
         this.sqlUpdate(null, sql, new Object[] {uuid});
+    }
 
+    @Override
+    public void restoreEntity(String uuid) {
+        String sql = "UPDATE library SET enabled = true WHERE uuid = ? ";
+        this.sqlUpdate(null, sql, new Object[] {uuid});
     }
 
     Object sqlUpdate( Object returnValue, String sql, Object[] parameters ) {

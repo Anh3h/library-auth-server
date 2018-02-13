@@ -25,6 +25,12 @@ public class UserQueryImplementation implements UserQuery {
     }
 
     @Override
+    public User findAllUserById(String uuid) {
+        UserEntity userEntity = userRepository.findByUuid(uuid);
+        return UserMapper.getUserDTO(userEntity);
+    }
+
+    @Override
     public UserEntity findUserByEmail(String email) {
         UserEntity userEntity = userRepository.findByEmailAndAccountLocked(email, false);
         return userEntity;
@@ -32,7 +38,14 @@ public class UserQueryImplementation implements UserQuery {
 
     @Override
     public Page<User> findUsers(Integer pageNumber, Integer pageSize) {
-        Page<UserEntity> userEntities = userRepository.findByAccountLocked(new PageRequest(pageNumber-1, pageSize), false);
+        Page<UserEntity> userEntities = userRepository.
+                findByAccountLocked(new PageRequest(pageNumber-1, pageSize), true);
+        return userEntities.map( userEntity -> UserMapper.getUserDTO(userEntity));
+    }
+
+    @Override
+    public Page<User> findAllUsers(Integer pageNumber, Integer pageSize) {
+        Page<UserEntity> userEntities = userRepository.findAll(new PageRequest(pageNumber-1, pageSize));
         return userEntities.map( userEntity -> UserMapper.getUserDTO(userEntity));
     }
 

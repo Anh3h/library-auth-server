@@ -13,6 +13,15 @@ public class UserJdbcTemplate {
     private JdbcTemplate jdbcTemplate;
 
     public void deleteEntity( String uuid ) {
+        String sql = "UPDATE user SET account_locked = true WHERE uuid = ?";
+        try {
+            this.jdbcTemplate.update(sql, new Object[] {uuid});
+        } catch (DataAccessException ex) {
+            throw BadRequestException.create(ex.getMessage());
+        }
+    }
+
+    public void restoreEntity( String uuid ) {
         String sql = "UPDATE user SET account_locked = false WHERE uuid = ?";
         try {
             this.jdbcTemplate.update(sql, new Object[] {uuid});

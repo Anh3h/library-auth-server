@@ -58,9 +58,9 @@ public class UserCommandImplementation implements UserCommand {
     @Override
     public User updateUser(User user) {
         if (user.getUuid() != null){
-            Integer userId = userRepository.findByUuidAndAccountLocked(user.getUuid(), false).getId();
-            if (userId != null) {
-
+            UserEntity entity = userRepository.findByUuidAndAccountLocked(user.getUuid(), false);
+            if (entity != null) {
+                Integer userId = entity.getId();
                 UserEntity userEntity = UserMapper.getUserDAO(user);
                 userEntity.setId(userId);
                 userEntity = this.setUserLibraryDetails(userEntity);
@@ -76,12 +76,16 @@ public class UserCommandImplementation implements UserCommand {
     @Override
     public void updatePassword(String uuid, Password password) {
         UserEntity user = userRepository.findByUuidAndAccountLocked(uuid, false);
-        if (passwordEncoder.matches(password.getOldPassword(), user.getPassword())) {
-            user.setPassword(passwordEncoder.encode(password.getNewPassword()));
-            userRepository.save(user);
-        } else {
-            throw BadRequestException.create("Invalid user password");
+        if ( user != null ) {
+            if (passwordEncoder.matches(password.getOldPassword(), user.getPassword())) {
+                user.setPassword(passwordEncoder.encode(password.getNewPassword()));
+                userRepository.save(user);
+            } else {
+                throw BadRequestException.create("Bad Request: Invalid user password");
+            }
+            return;
         }
+        throw NotFoundException.create("Not found: user with uuid, {0} does not exist", uuid);
     }
 
     @Override
@@ -101,12 +105,26 @@ public class UserCommandImplementation implements UserCommand {
 
     @Override
     public void deleteUser(String uuid) {
-        userJdbcTemplate.deleteEntity(uuid);
+        if ( userRepository.findByUuid(uuid) != null) {
+            userJdbcTemplate.deleteEntity(uuid);
+        }
+    }
+
+    @Override
+    public Boolean restoreUser(String uuid) {
+        if ( userRepository.findByUuid(uuid) != null){
+            userJdbcTemplate.restoreEntity(uuid);
+            return true;
+        }
+        throw NotFoundException.create("Not found: user with uuid, {0} does not exist", uuid);
     }
 
     private Integer getLibraryId(UserEntity userEntity) {
         LibraryEntity libraryEntity = libraryRepository.findByUuidAndEnabled
                 (userEntity.getLibrary().getUuid(), true);
+        if (libraryEntity == null ) {
+            throw NotFoundException.create("Library with uuid {0} does not exist", libraryEntity.getUuid());
+        }
         return libraryEntity.getId();
     }
 
@@ -114,7 +132,9 @@ public class UserCommandImplementation implements UserCommand {
         if (userEntity.getLibrary() != null && userEntity.getLibrary().getUuid() != null) {
             Integer libraryId = this.getLibraryId(userEntity);
             userEntity.getLibrary().setId(libraryId);
+            return userEntity;
         }
+        userEntity.setLibrary(null);
         return userEntity;
     }
 

@@ -55,17 +55,23 @@ public class UserController {
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Page<User>> getUsers(@RequestParam(value = "page", required = false) Integer page,
-                                               @RequestParam(value = "size", required = false) Integer size ){
+                                               @RequestParam(value = "size", required = false) Integer size,
+                                               @RequestParam(value =  "all", required = false) Boolean all ){
         if( page == null || size == null ) {
             page = 1;
             size = 20;
         } else if ( page <= 0 || size <= 0 ) {
-            throw BadRequestException.create("Invalid page number: {0} or page size: {1} value", page, size);
+            throw BadRequestException.create("Bad Request: Invalid page number: {0} or page size: {1} value", page, size);
         }
 
-        Page<User> users = this.userQuery.findUsers(page, size);
+        Page<User> users;
+        if (all == null || all == false) {
+            users = this.userQuery.findUsers(page, size);
+        } else {
+            users = this.userQuery.findAllUsers(page, size);
+        }
         if (page > users.getTotalPages()) {
-            throw NotFoundException.create("Page number does not exist");
+            throw NotFoundException.create("Not Found: Page number does not exist");
         }
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
@@ -76,12 +82,18 @@ public class UserController {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<User> getUser( @PathVariable("userId")String userId ) {
-        User user = this.userQuery.findUserById(userId);
-        if (user == null) {
-            throw NotFoundException.create("User with id, {0} does not exist", userId);
+    public ResponseEntity<User> getUser( @PathVariable("userId")String userId,
+                                         @RequestParam(value =  "all", required = false) Boolean all ) {
+        User user;
+        if (all == null || all == false) {
+            user = this.userQuery.findUserById(userId);
+        } else {
+            user = this.userQuery.findAllUserById(userId);
         }
 
+        if (user == null) {
+            throw NotFoundException.create("Not Found: User with id, {0} does not exist", userId);
+        }
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
@@ -95,7 +107,7 @@ public class UserController {
     public ResponseEntity<User> updateUser( @RequestBody User user,
                                             @PathVariable("userId")String userId) throws ParseException {
         if ( this.userQuery.findUserById(userId) == null ) {
-            throw NotFoundException.create("User with id, {0} does not exist", userId);
+            throw NotFoundException.create("Not Found: User with id, {0} does not exist", userId);
         }
         User updateUser = userCommand.updateUser(user);
         return new ResponseEntity<>(updateUser, HttpStatus.OK);
@@ -109,13 +121,22 @@ public class UserController {
     )
     public ResponseEntity<Map<String, String>> updatePassword( @RequestBody Password password,
                                             @PathVariable("userId")String userId) throws ParseException {
-        if ( this.userQuery.findUserById(userId) == null ) {
-            throw NotFoundException.create("User with id, {0} does not exist", userId);
-        }
         userCommand.updatePassword(userId, password);
         Map<String, String> response = new HashMap<>();
         response.put("response", "Successfully updated password");
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @ApiOperation(value="Restore deleted user account")
+    @RequestMapping(
+            value = "/{userId}",
+            method = RequestMethod.PUT,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<User> updateUser( @PathVariable("userId")String userId) {
+        userCommand.restoreUser(userId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @ApiOperation(value="Delete user based on user_id")

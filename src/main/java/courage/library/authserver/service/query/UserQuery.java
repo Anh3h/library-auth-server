@@ -7,12 +7,16 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface UserQuery {
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     User findUserById(String uuid);
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    User findAllUserById(String uuid);
 
     UserEntity findUserByEmail(String email);
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     Page<User> findUsers(Integer pageNumber, Integer pageSize );
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    Page<User> findAllUsers(Integer pageNumber, Integer pageSize );
 
 }

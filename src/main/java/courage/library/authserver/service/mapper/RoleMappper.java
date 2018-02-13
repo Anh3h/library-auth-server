@@ -16,7 +16,7 @@ public class RoleMappper {
         if (role == null) {
             return null;
         }
-        return new RoleEntity(role.getId(), role.getName(), true);
+        return new RoleEntity(role.getId(), role.getName());
     }
 
 }

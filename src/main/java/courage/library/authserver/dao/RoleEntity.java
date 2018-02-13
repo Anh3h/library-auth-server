@@ -24,15 +24,12 @@ public class RoleEntity {
     @NonNull
     private String name;
 
-    private Boolean enabled;
-
     @ManyToMany(mappedBy = "roles")
     private List<UserEntity> users;
 
-    public RoleEntity(String id, String name, Boolean enabled) {
+    public RoleEntity(String id, String name) {
         this.id = id;
         this.name = name;
-        this.enabled = enabled;
     }
 
 }

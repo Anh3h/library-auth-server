@@ -12,7 +12,12 @@ public interface UserRepository extends JpaRepository<UserEntity, Integer> {
 
     UserEntity findByEmail(@Param("email") String email);
 
+    UserEntity findByUuid(@Param("uuid") String uuid);
+
     UserEntity findByUuidAndAccountLocked(@Param("uuid") String uuid, @Param("isAvailable") Boolean accountLocked);
+
+    Page<UserEntity> findByLibraryAndAccountLocked(@Param("uuid") Integer libraryId, Pageable pageable,
+                                                   @Param("isAvailable") Boolean accountLocked);
 
     UserEntity findByEmailAndAccountLocked(@Param("email") String email, @Param("isAvailable") Boolean accountLocked);
 

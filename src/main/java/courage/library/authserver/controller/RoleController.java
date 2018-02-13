@@ -3,7 +3,6 @@ package courage.library.authserver.controller;
 import courage.library.authserver.dto.Role;
 import courage.library.authserver.exception.BadRequestException;
 import courage.library.authserver.exception.NotFoundException;
-import courage.library.authserver.service.command.RoleCommand;
 import courage.library.authserver.service.query.RoleQuery;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,21 +19,6 @@ public class RoleController {
     @Autowired
     private RoleQuery roleQuery;
 
-    @Autowired
-    private RoleCommand roleCommand;
-
-    @ApiOperation(value="Create new role")
-    @RequestMapping(
-            method = RequestMethod.POST,
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<Role> createRole( @RequestBody Role role ) {
-        System.out.println("Creating new role");
-        Role newRole = this.roleCommand.createRole( role );
-        return new ResponseEntity<>(newRole, HttpStatus.CREATED);
-    }
-
     @ApiOperation(value="Get all/some roles")
     @RequestMapping(
             method = RequestMethod.GET,
@@ -46,12 +30,12 @@ public class RoleController {
             page = 1;
             size = 20;
         } else if ( page <= 0 || size <= 0 ) {
-            throw BadRequestException.create("Invalid page number: {0} or page size: {1} value", page, size);
+            throw BadRequestException.create("Bad Request:  Invalid page number: {0} or page size: {1} value", page, size);
         }
 
         Page<Role> roles = this.roleQuery.findRoles(page, size);
         if (page > roles.getTotalPages()) {
-            throw NotFoundException.create("Page number does not exist");
+            throw NotFoundException.create("Not Found: Page number does not exist");
         }
         return new ResponseEntity<>(roles, HttpStatus.OK);
     }
@@ -65,35 +49,9 @@ public class RoleController {
     public ResponseEntity<Role> getRole( @PathVariable("roleId")String roleId ) {
         Role role = this.roleQuery.findRoleById(roleId);
         if (role == null) {
-            throw NotFoundException.create("Role with id, {0} does not exist", roleId);
+            throw NotFoundException.create("Not Found: Role with id, {0} does not exist", roleId);
         }
         return new ResponseEntity<>( role, HttpStatus.OK );
-    }
-
-    @ApiOperation(value="Update a role based on role_id")
-    @RequestMapping(
-            value = "/{roleId}",
-            method = RequestMethod.PUT,
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<Role> updateRole( @RequestBody Role role,
-                                            @PathVariable("roleId")String roleId ) {
-        if (this.roleQuery.findRoleById(roleId) == null) {
-            throw NotFoundException.create("Role with id, {0} does not exist", roleId);
-        }
-        Role updatedRole = this.roleCommand.updateRole(role);
-        return new ResponseEntity<>( updatedRole, HttpStatus.OK );
-    }
-
-    @ApiOperation(value="Delete role on role_id")
-    @RequestMapping(
-            value = "/{roleId}",
-            method = RequestMethod.DELETE
-    )
-    public ResponseEntity<HttpStatus> deleteRole( @PathVariable("roleId")String roleId ) {
-        this.roleCommand.deleteRole(roleId);
-        return new ResponseEntity<>( HttpStatus.NO_CONTENT );
     }
 
 }

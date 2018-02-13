@@ -44,10 +44,8 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
         String email = user.getEmail();
         String subject = "Password Reset";
         String confirmationUrl = "http://localhost:8081/resetPassword?token="+token;
-        String message = "Hi " + user.getFirstName() + ", This message is to confirm" +
-                "your BlahBlah account Verifying your email address helps you secure your " +
-                "account. If you forget your password, you will now be able to reset it by email." +
-                "To confirm that this is your Blahblah account, click here: " + confirmationUrl;
+        String message = "Hi " + user.getFirstName() + ", Looks like you forgot the password to your. " +
+                "Alles account. Please click the following link to reset you password: " + confirmationUrl;
 
         sendMail(email, subject, message);
 
@@ -58,8 +56,10 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
         String email = user.getEmail();
         String subject = "Registration Confirmation";
         String confirmationUrl = "http://localhost:8081/confirmRegistration?token="+token;
-        String message = "Hi " + user.getFirstName() + ", Looks like you'd like to change your BlahBlah password. " +
-                "Please click the following link to do so: " + confirmationUrl;
+        String message = "Hi " + user.getFirstName() + ", This message is to confirm" +
+                "your Alles account.\n Verifying your email address helps you secure your " +
+                "account. If you forgot your password, you will now be able to reset it by email." +
+                "To confirm that this is your Alles account, click here: " + confirmationUrl;
 
         sendMail(email, subject, message);
 
@@ -69,7 +69,7 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
     private void sendMail(String email, String subject, String message) {
         SimpleMailMessage mail = new SimpleMailMessage();
         mail.setTo(email);
-        mail.setFrom("no_reply@blahblah.com");
+        mail.setFrom("no_reply@alles.com");
         mail.setSubject(subject);
         mail.setText(message);
 

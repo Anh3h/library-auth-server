@@ -54,7 +54,6 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `role` (
   `id` VARCHAR(255) NOT NULL,
   `name` VARCHAR(25) NOT NULL,
-  `enabled` TINYINT(1) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `name_UNIQUE` (`name` ASC))
 ENGINE = InnoDB;
