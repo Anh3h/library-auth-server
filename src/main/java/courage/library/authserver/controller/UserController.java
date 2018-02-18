@@ -129,7 +129,7 @@ public class UserController {
 
     @ApiOperation(value="Restore deleted user account")
     @RequestMapping(
-            value = "/{userId}",
+            value = "/{userId}/activate",
             method = RequestMethod.PUT,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE

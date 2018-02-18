@@ -1,5 +1,6 @@
 package courage.library.authserver.service.command.implementation;
 
+import courage.library.authserver.AsyncNotifcation.MessageSender;
 import courage.library.authserver.dao.LibraryEntity;
 import courage.library.authserver.dao.UserEntity;
 import courage.library.authserver.dto.Library;
@@ -27,13 +28,17 @@ public class LibraryCommandImplementation implements LibraryCommand {
     @Autowired
     private LibraryJdbcTemplate libraryJdbcTemplate;
 
+    @Autowired
+    private MessageSender messageSender;
+
     @Override
     public Library createLibrary(Library library) {
         if ( libraryRepository.findByName(library.getName()) == null ) {
             library.setUuid(UUID.randomUUID().toString());
             LibraryEntity libraryEntity = libraryRepository.save(LibraryMapper.getLibraryDAO(library));
-
-            return LibraryMapper.getLibraryDTO(libraryEntity);
+            Library newLibrary = LibraryMapper.getLibraryDTO(libraryEntity);
+            messageSender.broadcastMessage(newLibrary);
+            return newLibrary;
         }
         throw ConflictException.create("Conflict: Library, {0} already exist", library.getName());
     }

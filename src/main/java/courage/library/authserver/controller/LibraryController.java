@@ -126,7 +126,7 @@ public class LibraryController {
 
     @ApiOperation(value="Restore deleted library")
     @RequestMapping(
-            value = "/{libraryId}",
+            value = "/{libraryId}/activate",
             method = RequestMethod.PUT,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
