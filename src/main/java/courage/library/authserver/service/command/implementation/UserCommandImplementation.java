@@ -13,6 +13,7 @@ import courage.library.authserver.repository.LibraryRepository;
 import courage.library.authserver.repository.TokenRepository;
 import courage.library.authserver.repository.UserRepository;
 import courage.library.authserver.repository.jdbcTemplate.UserJdbcTemplate;
+import courage.library.authserver.service.AsyncNotifcation.MessageSender;
 import courage.library.authserver.service.command.UserCommand;
 import courage.library.authserver.service.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,9 @@ public class UserCommandImplementation implements UserCommand {
     private UserJdbcTemplate userJdbcTemplate;
 
     @Autowired
+    private MessageSender messageSender;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -48,9 +52,9 @@ public class UserCommandImplementation implements UserCommand {
             userEntity.setPassword(passwordEncoder.encode(user.getPassword()));
             userEntity = this.setUserLibraryDetails(userEntity);
 
-            UserEntity newUserEntity = userRepository.save(userEntity);
-
-            return UserMapper.getUserDTO(newUserEntity);
+            User newUser = UserMapper.getUserDTO( userRepository.save(userEntity) );
+            messageSender.broadcastMessage(newUser);
+            return newUser;
         }
         throw ConflictException.create("Conflict: User, {0} already exist", user.getEmail());
     }
@@ -65,8 +69,9 @@ public class UserCommandImplementation implements UserCommand {
                 userEntity.setId(userId);
                 userEntity = this.setUserLibraryDetails(userEntity);
 
-                UserEntity updatedUserEntity = userRepository.save(userEntity);
-                return UserMapper.getUserDTO(updatedUserEntity);
+                User updatedUser = UserMapper.getUserDTO( userRepository.save(userEntity) );
+                messageSender.broadcastMessage(updatedUser);
+                return updatedUser;
             }
             throw NotFoundException.create("Not found: user with uuid, {0} does not exist", user.getUuid());
         }
@@ -107,6 +112,8 @@ public class UserCommandImplementation implements UserCommand {
     public void deleteUser(String uuid) {
         if ( userRepository.findByUuid(uuid) != null) {
             userJdbcTemplate.deleteEntity(uuid);
+            User user = UserMapper.getUserDTO( userRepository.findByUuid(uuid) );
+            messageSender.broadcastMessage(user);
         }
     }
 
@@ -114,6 +121,8 @@ public class UserCommandImplementation implements UserCommand {
     public Boolean restoreUser(String uuid) {
         if ( userRepository.findByUuid(uuid) != null){
             userJdbcTemplate.restoreEntity(uuid);
+            User user = UserMapper.getUserDTO( userRepository.findByUuid(uuid) );
+            messageSender.broadcastMessage(user);
             return true;
         }
         throw NotFoundException.create("Not found: user with uuid, {0} does not exist", uuid);

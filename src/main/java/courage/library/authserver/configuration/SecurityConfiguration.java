@@ -90,7 +90,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         webSecurity
                 .ignoring()
                 .antMatchers("/registration**", "/confirmRegistration**",
-                "/resetPassword**", "/forgotPassword**", "/oauth/token");
+                "/resetPassword**", "/forgotPassword**");
     }
 
     @Bean

@@ -3,8 +3,6 @@ package courage.library.authserver.controller;
 import courage.library.authserver.dto.Password;
 import courage.library.authserver.dto.User;
 import courage.library.authserver.dto.UserAccount;
-import courage.library.authserver.eventandlistner.OnRegistrationCompleteEvent;
-import courage.library.authserver.exception.BadRequestException;
 import courage.library.authserver.exception.NotFoundException;
 import courage.library.authserver.service.command.UserCommand;
 import courage.library.authserver.service.query.UserQuery;
@@ -41,7 +39,6 @@ public class UserController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<User> createUser( @RequestBody UserAccount userAccount ) throws ParseException {
-        System.out.println("creating new user");
         User user = new User(null, userAccount.getFirstName(), userAccount.getLastName(), userAccount.getEmail(),
                 userAccount.getPassword(), userAccount.getDob(), userAccount.getTelephone(), userAccount.getAddress(),
                 userAccount.getLibrary(), userAccount.getRoles());
@@ -57,19 +54,18 @@ public class UserController {
     public ResponseEntity<Page<User>> getUsers(@RequestParam(value = "page", required = false) Integer page,
                                                @RequestParam(value = "size", required = false) Integer size,
                                                @RequestParam(value =  "all", required = false) Boolean all ){
-        if( page == null || size == null ) {
-            page = 1;
-            size = 20;
-        } else if ( page <= 0 || size <= 0 ) {
-            throw BadRequestException.create("Bad Request: Invalid page number: {0} or page size: {1} value", page, size);
-        }
+        Map<String, Integer> pageAttributes = PageValidator.validatePageAndSize(page, size);
+        page = pageAttributes.get("page");
+        size = pageAttributes.get("size");
 
         Page<User> users;
         if (all == null || all == false) {
+            System.out.println("Hello");
             users = this.userQuery.findUsers(page, size);
         } else {
             users = this.userQuery.findAllUsers(page, size);
         }
+        System.out.println(users);
         if (page > users.getTotalPages()) {
             throw NotFoundException.create("Not Found: Page number does not exist");
         }

@@ -39,7 +39,7 @@ public class UserQueryImplementation implements UserQuery {
     @Override
     public Page<User> findUsers(Integer pageNumber, Integer pageSize) {
         Page<UserEntity> userEntities = userRepository.
-                findByAccountLocked(new PageRequest(pageNumber-1, pageSize), true);
+                findByAccountLocked(new PageRequest(pageNumber-1, pageSize), false);
         return userEntities.map( userEntity -> UserMapper.getUserDTO(userEntity));
     }
 

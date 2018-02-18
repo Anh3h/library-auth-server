@@ -37,7 +37,7 @@ spring:
     password: admin
 
 jms:
-  queue: jms-queue
+  queue: authentication-server-queue
 
 logging:
   level:

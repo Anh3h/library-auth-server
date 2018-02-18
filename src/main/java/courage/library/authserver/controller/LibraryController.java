@@ -14,6 +14,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/libraries")
 public class LibraryController {
@@ -44,12 +46,9 @@ public class LibraryController {
                                                        @RequestParam(value = "size", required = false) Integer size,
                                                        @RequestParam(value =  "all", required = false)
                                                                    Boolean all) {
-        if( page == null || size == null ) {
-            page = 1;
-            size = 20;
-        } else if ( page <= 0 || size <= 0 ) {
-            throw BadRequestException.create("Bad Request : Invalid page number: {0} or page size: {1} value", page, size);
-        }
+        Map<String, Integer> pageAttributes = PageValidator.validatePageAndSize(page, size);
+        page = pageAttributes.get("page");
+        size = pageAttributes.get("size");
 
         Page<Library> libraries;
         if (all == null || all == false) {
@@ -94,12 +93,9 @@ public class LibraryController {
                                               @RequestParam(value = "page", required = false) Integer page,
                                               @RequestParam(value = "size", required = false) Integer size
                                               ) {
-        if( page == null || size == null ) {
-            page = 1;
-            size = 20;
-        } else if ( page <= 0 || size <= 0 ) {
-            throw BadRequestException.create("Bad Request : Invalid page number: {0} or page size: {1} value", page, size);
-        }
+        Map<String, Integer> pageAttributes = PageValidator.validatePageAndSize(page, size);
+        page = pageAttributes.get("page");
+        size = pageAttributes.get("size");
 
         Page<User> librarians = this.libraryQuery.findLibrarians(libraryId, page, size);
         if (page > librarians.getTotalPages()) {

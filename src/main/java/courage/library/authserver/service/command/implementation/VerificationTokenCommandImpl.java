@@ -4,13 +4,16 @@ import courage.library.authserver.dao.RoleEntity;
 import courage.library.authserver.dao.UserEntity;
 import courage.library.authserver.dao.VerificationTokenEntity;
 import courage.library.authserver.dto.Password;
+import courage.library.authserver.dto.User;
 import courage.library.authserver.exception.BadRequestException;
 import courage.library.authserver.exception.ForbiddenException;
 import courage.library.authserver.exception.NotFoundException;
 import courage.library.authserver.repository.RoleRepository;
 import courage.library.authserver.repository.TokenRepository;
 import courage.library.authserver.repository.UserRepository;
+import courage.library.authserver.service.AsyncNotifcation.MessageSender;
 import courage.library.authserver.service.command.VerificationTokenCommand;
+import courage.library.authserver.service.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,6 +36,9 @@ public class VerificationTokenCommandImpl implements VerificationTokenCommand {
     private UserRepository userRepository;
 
     @Autowired
+    private MessageSender messageSender;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Override
@@ -50,7 +56,8 @@ public class VerificationTokenCommandImpl implements VerificationTokenCommand {
                 UserEntity userEntity = tokenEntity.getUser();
                 userEntity.addRole(roleRepository.findByName("ROLE_USER"));
                 userEntity.setEnabled(true);
-                userRepository.save(userEntity);
+                User user = UserMapper.getUserDTO( userRepository.save(userEntity) );
+                messageSender.broadcastMessage(user);
 
                 tokenEntity.setVerified(true);
                 tokenRepository.save(tokenEntity);

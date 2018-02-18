@@ -1,4 +1,4 @@
-package courage.library.authserver.AsyncNotifcation;
+package courage.library.authserver.service.AsyncNotifcation;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -15,11 +15,13 @@ public class MessageReceiver<T> {
     @Autowired
     private Environment env;
 
-    private static final String QUEUE = "jms-queue";
+    private static final String QUEUE = "transaction-server-queue";
 
-    @JmsListener(destination = QUEUE)
+    /*@JmsListener(destination = QUEUE)
     public T receiveMessage() {
-        return (T)jmsTemplate.receiveAndConvert(env.getProperty("jms.queue"));
-    }
+        System.out.println("Hello");
+        System.out.println( jmsTemplate.receiveAndConvert(env.getProperty("jms.queue")) );
+        return null;
+    }*/
 
 }

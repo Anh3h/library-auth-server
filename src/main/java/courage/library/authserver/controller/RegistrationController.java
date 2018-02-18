@@ -1,11 +1,10 @@
 package courage.library.authserver.controller;
 
 import courage.library.authserver.dao.UserEntity;
-import courage.library.authserver.dto.GenericReponse;
 import courage.library.authserver.dto.Password;
 import courage.library.authserver.dto.SimpleUser;
 import courage.library.authserver.dto.User;
-import courage.library.authserver.eventandlistner.OnRegistrationCompleteEvent;
+import courage.library.authserver.service.eventandlistner.OnRegistrationCompleteEvent;
 import courage.library.authserver.exception.NotFoundException;
 import courage.library.authserver.service.command.UserCommand;
 import courage.library.authserver.service.command.VerificationTokenCommand;
@@ -16,13 +15,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.OAuth2RefreshToken;
-import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
-import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
