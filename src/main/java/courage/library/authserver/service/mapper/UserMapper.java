@@ -4,6 +4,7 @@ import courage.library.authserver.dao.RoleEntity;
 import courage.library.authserver.dao.UserEntity;
 import courage.library.authserver.dto.Role;
 import courage.library.authserver.dto.User;
+import courage.library.authserver.dto.Message.UserMessage;
 import courage.library.authserver.exception.BadRequestException;
 
 import java.text.DateFormat;
@@ -14,6 +15,15 @@ import java.util.Date;
 import java.util.List;
 
 public class UserMapper {
+
+    public static UserMessage getUserMessage(User user) {
+        if (user != null ) {
+            return new UserMessage(user.getUuid(), user.getFirstName(), user.getLastName(),
+                    user.getEmail(), user.getDob(), user.getTelephone(), user.getAddress(),
+                    user.getLibrary(), user.getRoles(), "");
+        }
+        return null;
+    }
 
     public static User getUserDTO( UserEntity userEntity ) {
 

@@ -3,6 +3,7 @@ package courage.library.authserver.controller;
 import courage.library.authserver.dto.Password;
 import courage.library.authserver.dto.User;
 import courage.library.authserver.dto.UserAccount;
+import courage.library.authserver.exception.BadRequestException;
 import courage.library.authserver.exception.NotFoundException;
 import courage.library.authserver.service.command.UserCommand;
 import courage.library.authserver.service.query.UserQuery;
@@ -60,14 +61,13 @@ public class UserController {
 
         Page<User> users;
         if (all == null || all == false) {
-            System.out.println("Hello");
             users = this.userQuery.findUsers(page, size);
         } else {
             users = this.userQuery.findAllUsers(page, size);
         }
         System.out.println(users);
         if (page > users.getTotalPages()) {
-            throw NotFoundException.create("Not Found: Page number does not exist");
+            throw NotFoundException.create("Empty page");
         }
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
@@ -102,8 +102,9 @@ public class UserController {
     )
     public ResponseEntity<User> updateUser( @RequestBody User user,
                                             @PathVariable("userId")String userId) throws ParseException {
-        if ( this.userQuery.findUserById(userId) == null ) {
-            throw NotFoundException.create("Not Found: User with id, {0} does not exist", userId);
+        if ( userId.compareToIgnoreCase(user.getUuid()) != 0 ) {
+            throw BadRequestException.create("Route id {0} should not be different from object id {1}"
+                    , userId, user.getUuid());
         }
         User updateUser = userCommand.updateUser(user);
         return new ResponseEntity<>(updateUser, HttpStatus.OK);

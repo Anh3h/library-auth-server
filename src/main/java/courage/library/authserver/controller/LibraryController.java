@@ -57,7 +57,7 @@ public class LibraryController {
             libraries = this.libraryQuery.findAllLibraries(page, size);
         }
         if (page > libraries.getTotalPages()) {
-            throw NotFoundException.create("Not Found: Page number does not exist");
+            throw NotFoundException.create("Not Found: Empty page");
         }
         return new ResponseEntity<>(libraries, HttpStatus.OK);
     }
@@ -99,7 +99,7 @@ public class LibraryController {
 
         Page<User> librarians = this.libraryQuery.findLibrarians(libraryId, page, size);
         if (page > librarians.getTotalPages()) {
-            throw NotFoundException.create("Not Found: Page number does not exist");
+            throw NotFoundException.create("Not Found: Empty page");
         }
         return new ResponseEntity<>(librarians, HttpStatus.OK);
     }
@@ -113,8 +113,9 @@ public class LibraryController {
     )
     public ResponseEntity<Library> updateLibrary( @RequestBody Library library,
                                                   @PathVariable("libraryId")String libraryId) {
-        if ( this.libraryQuery.findLibraryById(libraryId) == null) {
-            throw NotFoundException.create("Not Found: Library with id, {0} does not exist", libraryId);
+        if ( libraryId.compareToIgnoreCase(library.getUuid()) != 0) {
+            throw BadRequestException.create("Route id {0} should not be different from object id {1}"
+                    , libraryId, library.getUuid());
         }
         Library updateLibrary = this.libraryCommand.updateLibrary(library);
         return new ResponseEntity<>(updateLibrary, HttpStatus.OK);

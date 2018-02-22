@@ -1,5 +1,7 @@
 package courage.library.authserver.controller;
 
+import java.util.Map;
+
 import courage.library.authserver.dto.Role;
 import courage.library.authserver.exception.BadRequestException;
 import courage.library.authserver.exception.NotFoundException;
@@ -26,16 +28,13 @@ public class RoleController {
     )
     public ResponseEntity<Page<Role>> getRoles(@RequestParam(value = "page", required = false) Integer page,
                                                @RequestParam(value = "size", required = false) Integer size ) {
-        if( page == null || size == null ) {
-            page = 1;
-            size = 20;
-        } else if ( page <= 0 || size <= 0 ) {
-            throw BadRequestException.create("Bad Request:  Invalid page number: {0} or page size: {1} value", page, size);
-        }
+        Map<String, Integer> pageAttributes = PageValidator.validatePageAndSize(page, size);
+        page = pageAttributes.get("page");
+        size = pageAttributes.get("size");
 
         Page<Role> roles = this.roleQuery.findRoles(page, size);
         if (page > roles.getTotalPages()) {
-            throw NotFoundException.create("Not Found: Page number does not exist");
+            throw NotFoundException.create("Not Found: Empty page");
         }
         return new ResponseEntity<>(roles, HttpStatus.OK);
     }

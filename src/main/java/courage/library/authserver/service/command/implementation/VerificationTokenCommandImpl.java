@@ -1,11 +1,10 @@
 package courage.library.authserver.service.command.implementation;
 
-import courage.library.authserver.dao.RoleEntity;
 import courage.library.authserver.dao.UserEntity;
 import courage.library.authserver.dao.VerificationTokenEntity;
 import courage.library.authserver.dto.Password;
 import courage.library.authserver.dto.User;
-import courage.library.authserver.exception.BadRequestException;
+import courage.library.authserver.dto.Message.UserMessage;
 import courage.library.authserver.exception.ForbiddenException;
 import courage.library.authserver.exception.NotFoundException;
 import courage.library.authserver.repository.RoleRepository;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Calendar;
-import java.util.List;
 
 @Service
 @Transactional
@@ -57,7 +55,9 @@ public class VerificationTokenCommandImpl implements VerificationTokenCommand {
                 userEntity.addRole(roleRepository.findByName("ROLE_USER"));
                 userEntity.setEnabled(true);
                 User user = UserMapper.getUserDTO( userRepository.save(userEntity) );
-                messageSender.broadcastMessage(user);
+                UserMessage userMessage = UserMapper.getUserMessage(user);
+                userMessage.setAction("create");
+                messageSender.broadcastMessage(userMessage);
 
                 tokenEntity.setVerified(true);
                 tokenRepository.save(tokenEntity);

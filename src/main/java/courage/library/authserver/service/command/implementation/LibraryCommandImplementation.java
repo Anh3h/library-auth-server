@@ -1,5 +1,6 @@
 package courage.library.authserver.service.command.implementation;
 
+import courage.library.authserver.dto.Message.LibraryMessage;
 import courage.library.authserver.service.AsyncNotifcation.MessageSender;
 import courage.library.authserver.dao.LibraryEntity;
 import courage.library.authserver.dao.UserEntity;
@@ -38,7 +39,9 @@ public class LibraryCommandImplementation implements LibraryCommand {
             LibraryEntity libraryEntity = libraryRepository.save(LibraryMapper.getLibraryDAO(library));
 
             Library newLibrary = LibraryMapper.getLibraryDTO(libraryEntity);
-            messageSender.broadcastMessage(newLibrary);
+            LibraryMessage libraryMessage = LibraryMapper.getLibraryMessage(newLibrary);
+            libraryMessage.setAction("create");
+            messageSender.broadcastMessage(libraryMessage);
             return newLibrary;
         }
         throw ConflictException.create("Conflict: Library, {0} already exist", library.getName());
@@ -49,7 +52,9 @@ public class LibraryCommandImplementation implements LibraryCommand {
         if (library.getUuid() != null) {
             if ( this.libraryRepository.findByUuidAndEnabled(library.getUuid(), true) != null) {
                 Library updatedLibrary = libraryJdbcTemplate.updateEntity(LibraryMapper.getLibraryDAO(library));
-                messageSender.broadcastMessage(updatedLibrary);
+                LibraryMessage libraryMessage = LibraryMapper.getLibraryMessage(updatedLibrary);
+                libraryMessage.setAction("update");
+                messageSender.broadcastMessage(libraryMessage);
                 return updatedLibrary;
             }
             throw NotFoundException.create("Not Found: Library with uuid, {0} does not exist", library.getUuid());
@@ -65,7 +70,9 @@ public class LibraryCommandImplementation implements LibraryCommand {
             if (users == null || users.isEmpty()) {
                 libraryJdbcTemplate.deleteEntity(uuid);
                 Library library = LibraryMapper.getLibraryDTO( libraryRepository.findByUuid(uuid) );
-                messageSender.broadcastMessage(library);
+                LibraryMessage libraryMessage = LibraryMapper.getLibraryMessage(library);
+                libraryMessage.setAction("delete");
+                messageSender.broadcastMessage(libraryMessage);
             }
             throw BadRequestException.create("Bad Request: Library has one/more librarians");
         }
@@ -76,7 +83,9 @@ public class LibraryCommandImplementation implements LibraryCommand {
         if ( libraryRepository.findByUuid(uuid) != null) {
             libraryJdbcTemplate.restoreEntity(uuid);
             Library library = LibraryMapper.getLibraryDTO( libraryRepository.findByUuid(uuid) );
-            messageSender.broadcastMessage(library);
+            LibraryMessage libraryMessage = LibraryMapper.getLibraryMessage(library);
+            libraryMessage.setAction("restore");
+            messageSender.broadcastMessage(libraryMessage);
             return true;
         }
         throw BadRequestException.create("Bad Request: Library with uuid, {0} does not exist", uuid);

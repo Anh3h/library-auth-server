@@ -10,7 +10,7 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Library implements Serializable {
+public class Library {
 
     private String uuid;
     @NonNull private String name;
