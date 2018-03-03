@@ -1,6 +1,7 @@
 package courage.library.authserver.service.command.implementation;
 
 import courage.library.authserver.dao.LibraryEntity;
+import courage.library.authserver.dao.RoleEntity;
 import courage.library.authserver.dao.UserEntity;
 import courage.library.authserver.dto.Password;
 import courage.library.authserver.dto.User;
@@ -9,7 +10,9 @@ import courage.library.authserver.exception.BadRequestException;
 import courage.library.authserver.exception.ConflictException;
 import courage.library.authserver.exception.NotFoundException;
 import courage.library.authserver.repository.LibraryRepository;
+import courage.library.authserver.repository.RoleRepository;
 import courage.library.authserver.repository.UserRepository;
+import courage.library.authserver.repository.jdbcTemplate.RoleJdbcTemplate;
 import courage.library.authserver.repository.jdbcTemplate.UserJdbcTemplate;
 import courage.library.authserver.service.AsyncNotifcation.MessageSender;
 import courage.library.authserver.service.command.UserCommand;
@@ -19,6 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -34,19 +39,30 @@ public class UserCommandImplementation implements UserCommand {
     private MessageSender messageSender;
 
     @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
     private LibraryRepository libraryRepository;
 
+    @Autowired
+    private RoleJdbcTemplate roleJdbcTemplate;
+
     @Override
     @Transactional
     public User createUser(User user) {
+        if (user.getEmail().isEmpty()) {
+            throw BadRequestException.create("User email cannot be empty");
+        }
         if ( userRepository.findByEmail(user. getEmail()) == null ) {
+
             user.setUuid(UUID.randomUUID().toString());
             UserEntity userEntity = UserMapper.getUserDAO(user);
             userEntity.setPassword(passwordEncoder.encode(user.getPassword()));
             userEntity = this.setUserLibraryDetails(userEntity);
+            userEntity = this.setRolesDetails(userEntity);
 
             User newUser = UserMapper.getUserDTO( userRepository.save(userEntity) );
             UserMessage userMessage = UserMapper.getUserMessage(newUser);
@@ -61,12 +77,18 @@ public class UserCommandImplementation implements UserCommand {
     @Transactional
     public User updateUser(User user) {
         if (user.getUuid() != null){
+            if (user.getEmail().isEmpty()) {
+                throw BadRequestException.create("User email cannot be empty");
+            }
             UserEntity entity = userRepository.findByUuidAndAccountLocked(user.getUuid(), false);
             if (entity != null) {
                 Integer userId = entity.getId();
+                user.setPassword(entity.getPassword());
                 UserEntity userEntity = UserMapper.getUserDAO(user);
                 userEntity.setId(userId);
+                userEntity.setEmail(entity.getEmail());
                 userEntity = this.setUserLibraryDetails(userEntity);
+                userEntity = this.setRolesDetails(userEntity);
 
                 User updatedUser = UserMapper.getUserDTO( userRepository.save(userEntity) );
                 UserMessage userMessage = UserMapper.getUserMessage(updatedUser);
@@ -137,22 +159,47 @@ public class UserCommandImplementation implements UserCommand {
         throw NotFoundException.create("Not found: user with uuid, {0} does not exist", uuid);
     }
 
-    private Integer getLibraryId(UserEntity userEntity) {
-        LibraryEntity libraryEntity = libraryRepository.findByUuidAndEnabled
-                (userEntity.getLibrary().getUuid(), true);
-        if (libraryEntity == null ) {
-            throw NotFoundException.create("Library with uuid {0} does not exist", libraryEntity.getUuid());
-        }
-        return libraryEntity.getId();
-    }
-
     private UserEntity setUserLibraryDetails(UserEntity userEntity) {
-        if (userEntity.getLibrary() != null && userEntity.getLibrary().getUuid() != null) {
-            Integer libraryId = this.getLibraryId(userEntity);
-            userEntity.getLibrary().setId(libraryId);
-            return userEntity;
+        if (userEntity.getLibrary() != null) {
+            if (userEntity.getLibrary().getUuid() != null) {
+                LibraryEntity libraryEntity = libraryRepository.findByUuidAndEnabled
+                        (userEntity.getLibrary().getUuid(), true);
+                if (libraryEntity != null){
+                    userEntity.setLibrary(libraryEntity);
+                    RoleEntity role = roleJdbcTemplate.findByName("ROLE_LIBRARIAN");
+                    if (role != null ) {
+                        userEntity.addRole(role);
+                    }
+                    return userEntity;
+                }
+                throw NotFoundException.
+                        create("Library with uuid {0} does not exist", userEntity.getLibrary().getUuid());
+            }
+            throw BadRequestException.create("Library uuid cannot be empty");
         }
         userEntity.setLibrary(null);
+        return userEntity;
+    }
+
+    private UserEntity setRolesDetails(UserEntity userEntity) {
+        List<RoleEntity> roles = new ArrayList<>();
+        if (userEntity.getRoles() != null || userEntity.getRoles().size() > 0) {
+            userEntity.getRoles().forEach(roleEntity -> {
+                if (roleEntity.getId() != null) {
+                    RoleEntity role = roleRepository.findById(roleEntity.getId());
+                    if (role == null) {
+                        throw NotFoundException.create("Not Found: Role with id {0} does not exist", roleEntity.getId());
+                    }
+                    if (role.getName().compareTo("ROLE_LIBRARIAN") == 0 && userEntity.getLibrary() == null) {
+                        throw BadRequestException.create("Bad Request: Librarian must have library");
+                    }
+                    roles.add(role);
+                    return;
+                }
+                throw BadRequestException.create("Bad Request: Role id cannot be null");
+            });
+            userEntity.setRoles(roles);
+        }
         return userEntity;
     }
 

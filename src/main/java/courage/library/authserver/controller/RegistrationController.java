@@ -1,13 +1,17 @@
 package courage.library.authserver.controller;
 
+import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Map;
+
 import courage.library.authserver.dao.UserEntity;
-import courage.library.authserver.dto.Password;
+import courage.library.authserver.dto.ForgotPassword;
 import courage.library.authserver.dto.SimpleUser;
 import courage.library.authserver.dto.User;
-import courage.library.authserver.service.eventandlistner.OnRegistrationCompleteEvent;
 import courage.library.authserver.exception.NotFoundException;
 import courage.library.authserver.service.command.UserCommand;
 import courage.library.authserver.service.command.VerificationTokenCommand;
+import courage.library.authserver.service.eventandlistner.OnRegistrationCompleteEvent;
 import courage.library.authserver.service.query.UserQuery;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +19,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class RegistrationController {
@@ -45,7 +49,7 @@ public class RegistrationController {
     )
     public ResponseEntity<Map<String, String>> registerUserAccount( @RequestBody SimpleUser user ) throws ParseException {
         User userDTO = new User(null, user.getFirstName(), user.getLastName(),
-                user.getEmail(), user.getPassword(), user.getDob(), user.getTelephone(),
+                user.getEmail(), user.getPassword(), user.getDob().toString(), user.getTelephone(),
                 user.getAddress());
         UserEntity registeredUser = userCommand.registerUser(userDTO);
 
@@ -63,7 +67,7 @@ public class RegistrationController {
 
     @ApiOperation(value="Confirm user registered email")
     @RequestMapping(
-            value = "/confirmRegistration",
+            value = "/confirm-registration",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
@@ -76,7 +80,7 @@ public class RegistrationController {
 
     @ApiOperation(value="Forgot password")
     @RequestMapping(
-            value = "/forgotPassword",
+            value = "/forgot-password",
             method = RequestMethod.GET,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
@@ -100,12 +104,12 @@ public class RegistrationController {
 
     @ApiOperation(value="Update password after forgot password")
     @RequestMapping(
-            value = "/resetPassword",
+            value = "/reset-password",
             method = RequestMethod.PUT,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Map<String, String>> resetPassword(@RequestBody Password password,
+    public ResponseEntity<Map<String, String>> resetPassword(@RequestBody ForgotPassword password,
                                                         @RequestParam("token") String token) {
         tokenCommand.changeForgottenPassword(token, password);
         Map<String, String> response = new HashMap<>();

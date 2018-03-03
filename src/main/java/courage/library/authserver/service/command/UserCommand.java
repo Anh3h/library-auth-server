@@ -15,7 +15,7 @@ public interface UserCommand {
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
     User updateUser( User user ) throws ParseException;
 
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
     void updatePassword(String uuid, Password password);
 
     UserEntity registerUser(User user ) throws ParseException;

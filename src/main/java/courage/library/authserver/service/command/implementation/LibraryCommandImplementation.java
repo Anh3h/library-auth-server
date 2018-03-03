@@ -1,6 +1,7 @@
 package courage.library.authserver.service.command.implementation;
 
 import courage.library.authserver.dto.Message.LibraryMessage;
+import courage.library.authserver.repository.UserRepository;
 import courage.library.authserver.service.AsyncNotifcation.MessageSender;
 import courage.library.authserver.dao.LibraryEntity;
 import courage.library.authserver.dao.UserEntity;
@@ -25,6 +26,9 @@ public class LibraryCommandImplementation implements LibraryCommand {
 
     @Autowired
     private LibraryRepository libraryRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private LibraryJdbcTemplate libraryJdbcTemplate;
@@ -66,13 +70,14 @@ public class LibraryCommandImplementation implements LibraryCommand {
     public void deleteLibrary(String uuid) {
         LibraryEntity libraryEntity = libraryRepository.findByUuid(uuid);
         if (libraryEntity != null) {
-            List<UserEntity> users = libraryEntity.getUsers();
-            if (users == null || users.isEmpty()) {
+            List<UserEntity> users = userRepository.findByLibrary(libraryEntity);
+            if (users == null || users.size() == 0) {
                 libraryJdbcTemplate.deleteEntity(uuid);
                 Library library = LibraryMapper.getLibraryDTO( libraryRepository.findByUuid(uuid) );
                 LibraryMessage libraryMessage = LibraryMapper.getLibraryMessage(library);
                 libraryMessage.setAction("delete");
                 messageSender.broadcastMessage(libraryMessage);
+                return;
             }
             throw BadRequestException.create("Bad Request: Library has one/more librarians");
         }

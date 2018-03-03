@@ -1,5 +1,8 @@
 package courage.library.authserver.repository;
 
+import java.util.List;
+
+import courage.library.authserver.dao.LibraryEntity;
 import courage.library.authserver.dao.UserEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,13 +17,16 @@ public interface UserRepository extends JpaRepository<UserEntity, Integer> {
 
     UserEntity findByUuid(@Param("uuid") String uuid);
 
-    UserEntity findByUuidAndAccountLocked(@Param("uuid") String uuid, @Param("isAvailable") Boolean accountLocked);
+    List<UserEntity> findByLibrary(@Param("library") LibraryEntity library);
 
-    Page<UserEntity> findByLibraryAndAccountLocked(@Param("uuid") Integer libraryId, Pageable pageable,
-                                                   @Param("isAvailable") Boolean accountLocked);
+    UserEntity findByUuidAndAccountLocked(@Param("uuid") String uuid, @Param("accountLocked") Boolean accountLocked);
 
-    UserEntity findByEmailAndAccountLocked(@Param("email") String email, @Param("isAvailable") Boolean accountLocked);
+    Page<UserEntity> findByLibraryAndAccountLocked(@Param("library") LibraryEntity library, Pageable pageable,
+                                                   @Param("accountLocked") Boolean accountLocked);
 
-    Page<UserEntity> findByAccountLocked(Pageable pageable, @Param("isAvailable") Boolean accountLocked);
+    UserEntity findByEmailAndAccountLockedAndEnabled(@Param("email") String email,
+            @Param("accountLocked") Boolean accountLocked, @Param("enabled") Boolean enabled );
+
+    Page<UserEntity> findByAccountLocked(Pageable pageable, @Param("accountLocked") Boolean accountLocked);
 
 }

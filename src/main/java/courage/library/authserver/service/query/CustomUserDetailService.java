@@ -23,7 +23,7 @@ public class CustomUserDetailService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         try {
-            UserEntity userEntity = this.userRepository.findByEmailAndAccountLocked(email, false);
+            UserEntity userEntity = this.userRepository.findByEmailAndAccountLockedAndEnabled(email, false, true);
 
             if (userEntity == null) {
                 throw new UsernameNotFoundException(String.format("Email[%s] not found", email));

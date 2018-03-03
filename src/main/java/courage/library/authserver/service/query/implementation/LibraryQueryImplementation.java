@@ -54,7 +54,7 @@ public class LibraryQueryImplementation implements LibraryQuery {
     public Page<User> findLibrarians(String libraryId, Integer pageNumber, Integer pageSize) {
         LibraryEntity libraryEntity = libraryRepository.findByUuidAndEnabled(libraryId, true);
         if (libraryEntity != null) {
-            Page<UserEntity> userEntities = userRepository.findByLibraryAndAccountLocked(libraryEntity.getId(),
+            Page<UserEntity> userEntities = userRepository.findByLibraryAndAccountLocked(libraryEntity,
                     new PageRequest(pageNumber - 1, pageSize),false);
             return userEntities.map(userEntity -> UserMapper.getUserDTO(userEntity));
         }

@@ -18,7 +18,6 @@ public class MessageSender {
         jmsTemplate.send(session -> {
             try {
                 String message = new ObjectMapper().writeValueAsString(object);
-                System.out.println(message);
                 return session.createObjectMessage(message);
             } catch (IOException e) {
                 throw ForbiddenException.create(e.getMessage());

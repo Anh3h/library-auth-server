@@ -40,8 +40,11 @@ public class UserController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<User> createUser( @RequestBody UserAccount userAccount ) throws ParseException {
+        if (userAccount.getPassword() == null || userAccount.getPassword().isEmpty()) {
+            throw BadRequestException.create("Bad Request: Password must not be null or empty");
+        }
         User user = new User(null, userAccount.getFirstName(), userAccount.getLastName(), userAccount.getEmail(),
-                userAccount.getPassword(), userAccount.getDob(), userAccount.getTelephone(), userAccount.getAddress(),
+                userAccount.getPassword(), userAccount.getDob().toString(), userAccount.getTelephone(), userAccount.getAddress(),
                 userAccount.getLibrary(), userAccount.getRoles());
         User newUser = this.userCommand.createUser(user);
         return new ResponseEntity<>(newUser, HttpStatus.CREATED);

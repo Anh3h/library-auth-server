@@ -32,7 +32,7 @@ public class UserQueryImplementation implements UserQuery {
 
     @Override
     public UserEntity findUserByEmail(String email) {
-        UserEntity userEntity = userRepository.findByEmailAndAccountLocked(email, false);
+        UserEntity userEntity = userRepository.findByEmailAndAccountLockedAndEnabled(email, false, true);
         return userEntity;
     }
 

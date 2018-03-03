@@ -1,13 +1,19 @@
 package courage.library.authserver.service.eventandlistner;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+
 import courage.library.authserver.dao.UserEntity;
 import courage.library.authserver.service.command.VerificationTokenCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.MailException;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring4.SpringTemplateEngine;
 
 import java.text.ParseException;
 import java.util.UUID;
@@ -20,6 +26,9 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
 
     @Autowired
     private JavaMailSender mailSender;
+
+    @Autowired
+    private SpringTemplateEngine templateEngine;
 
     @Override
     public void onApplicationEvent(OnRegistrationCompleteEvent event) {
@@ -41,11 +50,8 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
 
         String email = user.getEmail();
         String subject = "Password Reset";
-        String confirmationUrl = "http://localhost:8081/resetPassword?token="+token;
-        String message = "Hi " + user.getFirstName() + ", Looks like you forgot the password to your. " +
-                "Alles account. Please click the following link to reset you password: " + confirmationUrl;
 
-        sendMail(email, subject, message);
+        sendMail(email, subject, getResetPwdMessage(user.getFirstName(), token));
 
     }
 
@@ -53,26 +59,46 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
 
         String email = user.getEmail();
         String subject = "Registration Confirmation";
-        String confirmationUrl = "http://localhost:8081/confirmRegistration?token="+token;
-        String message = "Hi " + user.getFirstName() + ", This message is to confirm" +
-                "your Alles account.\n Verifying your email address helps you secure your " +
-                "account. If you forgot your password, you will now be able to reset it by email." +
-                "To confirm that this is your Alles account, click here: " + confirmationUrl;
 
-        sendMail(email, subject, message);
-
+        sendMail(email, subject, getConfirmRegistrationMessage(user.getFirstName(),token ));
 
     }
 
+    private String getConfirmRegistrationMessage(String name, String token) {
+        final Context ctx = new Context();
+        ctx.setVariable("name", name);
+        ctx.setVariable("token", token);
+        ctx.setVariable("logo", new ClassPathResource("logo.png").getPath());
+        return this.templateEngine.process(new ClassPathResource("confirmationMail").getPath(), ctx);
+    }
+
+    private String getResetPwdMessage(String name, String token) {
+        final Context ctx = new Context();
+        ctx.setVariable("name", name);
+        ctx.setVariable("token", token);
+        ctx.setVariable("logo", new ClassPathResource("logo.png").getPath());
+
+        return this.templateEngine.process(new ClassPathResource("forgotPasswordMail").getPath(), ctx);
+    }
+
     private void sendMail(String email, String subject, String message) {
-        SimpleMailMessage mail = new SimpleMailMessage();
-        mail.setTo(email);
-        mail.setFrom("no_reply@alles.com");
-        mail.setSubject(subject);
-        mail.setText(message);
+        MimeMessage mimeMessage = this.mailSender.createMimeMessage();
+        final MimeMessageHelper mail;
+        try {
+            mail = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
+            mail.addAttachment("logo.png", new ClassPathResource("logo.png"));
+            mail.setTo(email);
+            mail.setFrom("no_reply@alles.com");
+            mail.setSubject(subject);
+            mail.setText(message, true);
+        }
+        catch (MessagingException e) {
+            e.printStackTrace();
+        }
+
 
         try {
-            mailSender.send(mail);
+            mailSender.send(mimeMessage);
             System.out.println("Mail sent");
         } catch (MailException ex) {
             System.out.println(ex.getMessage());

@@ -69,7 +69,7 @@ public class UserEntity {
         this.accountLocked = accountLocked;
     }
 
-    public void addRole(RoleEntity roles) {
-        this.roles.add(roles);
+    public void addRole(RoleEntity role) {
+        this.roles.add(role);
     }
 }
